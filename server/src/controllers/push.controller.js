@@ -1,5 +1,8 @@
+import { timingSafeEqual } from 'node:crypto';
 import Subscription from '../models/Subscription.js';
 import { config } from '../config.js';
+import { runDuePushJob } from '../jobs/pushScheduler.js';
+import { AppError } from '../utils/AppError.js';
 
 export const getVapidKey = (_req, res) => {
   res.json({ publicKey: config.vapidPublicKey });
@@ -19,4 +22,15 @@ export const subscribe = async (req, res) => {
 export const unsubscribe = async (req, res) => {
   await Subscription.deleteOne({ owner: req.userId, endpoint: req.valid.body.endpoint });
   res.status(204).end();
+};
+
+// เรียกโดย Vercel Cron วันละครั้ง (แทน setInterval ที่ใช้ไม่ได้บน serverless)
+export const runPushCron = async (req, res) => {
+  if (!config.cronSecret) throw new AppError(503, 'Cron is not configured');
+  const given = Buffer.from(req.get('authorization') ?? '');
+  const expected = Buffer.from(`Bearer ${config.cronSecret}`);
+  if (given.length !== expected.length || !timingSafeEqual(given, expected)) {
+    throw new AppError(401, 'Unauthorized');
+  }
+  res.json({ sent: await runDuePushJob() });
 };

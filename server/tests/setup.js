@@ -3,6 +3,7 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
 import mongoose from 'mongoose';
 
 process.env.JWT_SECRET ??= 'test-secret';
+process.env.CRON_SECRET ??= 'test-cron-secret';
 
 let mongod;
 
