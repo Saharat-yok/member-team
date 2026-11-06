@@ -27,6 +27,7 @@ router.patch('/tasks/:id', validate({ params: s.idParams, body: s.updateTaskSche
 router.delete('/tasks/:id', validate({ params: s.idParams }), task.deleteTask);
 
 // Web Push
+router.get('/cron/push', push.runPushCron); // ป้องกันด้วย CRON_SECRET ไม่ใช้ cookie
 router.get('/push/vapid-public-key', requireAuth, push.getVapidKey);
 router.post('/push/subscribe', requireAuth, validate({ body: s.pushSubscribeSchema }), push.subscribe);
 router.delete('/push/subscribe', requireAuth, validate({ body: s.pushUnsubscribeSchema }), push.unsubscribe);

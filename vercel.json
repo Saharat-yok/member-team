@@ -1,0 +1,17 @@
+{
+  "installCommand": "npm ci",
+  "buildCommand": "npm run build -w client",
+  "outputDirectory": "client/dist",
+  "functions": {
+    "api/[...path].js": {
+      "maxDuration": 10,
+      "includeFiles": "{shared,server/src}/**"
+    }
+  },
+  "rewrites": [
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
+  ],
+  "crons": [
+    { "path": "/api/v1/cron/push", "schedule": "0 1 * * *" }
+  ]
+}

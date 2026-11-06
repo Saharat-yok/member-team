@@ -8,5 +8,6 @@ export const config = {
   vapidPublicKey: process.env.VAPID_PUBLIC_KEY ?? '',
   vapidPrivateKey: process.env.VAPID_PRIVATE_KEY ?? '',
   vapidSubject: process.env.VAPID_SUBJECT ?? 'mailto:admin@example.com',
+  cronSecret: process.env.CRON_SECRET ?? '', // Vercel Cron ส่งมาเป็น Authorization: Bearer <CRON_SECRET>
   isProd: process.env.NODE_ENV === 'production',
 };

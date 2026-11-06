@@ -61,3 +61,12 @@ describe('Phase 4: Web Push & Health', () => {
     expect(res.body).toEqual({ status: 'ok', db: 'up' });
   });
 });
+
+describe('Vercel Cron endpoint', () => {
+  it('TC-39 /cron/push ต้องมี CRON_SECRET ที่ถูกต้อง ไม่เช่นนั้น 401', async () => {
+    await request(app).get('/api/v1/cron/push').expect(401);
+    await request(app).get('/api/v1/cron/push').set('Authorization', 'Bearer wrong-secret').expect(401);
+    const ok = await request(app).get('/api/v1/cron/push').set('Authorization', 'Bearer test-cron-secret').expect(200);
+    expect(ok.body).toEqual({ sent: 0 });
+  });
+});
