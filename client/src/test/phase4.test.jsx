@@ -136,4 +136,25 @@ describe('Phase 4: Offline, Cache & Web Push', () => {
     expect(screen.queryByText(/Hey developer/)).not.toBeInTheDocument();
     spy.mockRestore();
   });
+
+  it('TC-38 เปิดแอปตอนออฟไลน์อยู่แล้ว (ไม่มี offline event) → แก้งานแล้วเข้าคิว ไม่ rollback', async () => {
+    let patched = 0;
+    server.use(http.patch('/api/v1/tasks/:id', async ({ request, params }) => {
+      patched++;
+      Object.assign(db.tasks.find((t) => t._id === params.id), await request.json());
+      return HttpResponse.json({ data: db.tasks[0] });
+    }));
+    Object.defineProperty(navigator, 'onLine', { value: false, configurable: true }); // โหลดหน้ามาตอนไม่มีเน็ต ไม่มี event
+    const { user } = renderApp('/');
+    const box = await screen.findByRole('checkbox', { name: /ประชุมทีม/ });
+
+    await user.click(box);
+    await waitFor(() => expect(box).toBeChecked());
+    await new Promise((r) => setTimeout(r, 300));
+    expect(patched).toBe(0);
+    expect(box).toBeChecked();
+
+    await setOnline(true);
+    await waitFor(() => expect(patched).toBe(1));
+  });
 });

@@ -1,4 +1,4 @@
-import { MutationCache, QueryCache, QueryClient } from '@tanstack/react-query';
+import { MutationCache, QueryCache, QueryClient, onlineManager } from '@tanstack/react-query';
 
 export const CACHE_KEY = 'tm-query-cache-v1';
 const MAX_AGE = 24 * 60 * 60 * 1000; // 24 ชั่วโมง
@@ -12,6 +12,10 @@ export function clearPersistedCache() {
 }
 
 export function createQueryClient({ persist = false } = {}) {
+  // TanStack Query สมมติว่าออนไลน์ไว้ก่อนและเปลี่ยนสถานะเฉพาะตอนมี event online/offline
+  // ถ้าเปิดแอปตอนไม่มีเน็ตอยู่แล้วจะไม่มี event จึงต้องตั้งค่าเริ่มต้นจาก navigator.onLine เอง
+  if (typeof navigator !== 'undefined') onlineManager.setOnline(navigator.onLine);
+
   let client;
   const on401 = (err) => {
     if (err?.status === 401) {
