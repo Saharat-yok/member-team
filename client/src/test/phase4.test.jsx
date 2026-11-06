@@ -4,7 +4,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { http, HttpResponse } from 'msw';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { routes } from '../routes.jsx';
+import { RouteError, routes } from '../routes.jsx';
 import { CACHE_KEY, createQueryClient } from '../lib/queryClient.js';
 import { enableNotifications } from '../lib/notify.js';
 import { USER, db, resetDb, server } from './server.js';
@@ -125,5 +125,15 @@ describe('Phase 4: Offline, Cache & Web Push', () => {
     await waitFor(() => expect(patched).toBe(1));             // ส่งจากคิวหลังกลับมาออนไลน์
     expect(db.tasks[0].status).toBe('done');
     expect(await screen.findByRole('checkbox', { name: /ประชุมทีม/ })).toBeChecked();
+  });
+
+  it('TC-37 โหลดหน้าไม่สำเร็จ → แสดงข้อความภาษาไทยพร้อมปุ่มโหลดใหม่ ไม่ใช่หน้า error ดิบ', async () => {
+    const Boom = () => { throw new TypeError('Failed to fetch dynamically imported module'); };
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    render(<RouterProvider router={createMemoryRouter([{ path: '/', element: <Boom />, errorElement: <RouteError /> }])} />);
+    expect(await screen.findByRole('alert')).toHaveTextContent('โหลดหน้านี้ไม่สำเร็จ');
+    expect(screen.getByRole('button', { name: 'โหลดใหม่' })).toBeInTheDocument();
+    expect(screen.queryByText(/Hey developer/)).not.toBeInTheDocument();
+    spy.mockRestore();
   });
 });
