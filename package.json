@@ -1,0 +1,9 @@
+{
+  "name": "task-manager-monorepo",
+  "private": true,
+  "workspaces": ["shared", "server", "client"],
+  "scripts": {
+    "test": "npm test --workspaces --if-present",
+    "build": "npm run build -w client"
+  }
+}

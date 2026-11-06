@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import app from './app.js';
 import { config } from './config.js';
+import { startPushScheduler } from './jobs/pushScheduler.js';
 
 if (!config.mongoUri || !config.jwtSecret) {
   console.error('Missing MONGO_URI or JWT_SECRET');
@@ -10,4 +11,9 @@ if (!config.mongoUri || !config.jwtSecret) {
 await mongoose.connect(config.mongoUri);
 const server = app.listen(config.port, () => console.log(`API ready → http://localhost:${config.port}`));
 
-process.on('SIGTERM', () => server.close(() => mongoose.disconnect())); // graceful shutdown
+const stopScheduler = startPushScheduler();
+
+process.on('SIGTERM', () => { // graceful shutdown
+  stopScheduler();
+  server.close(() => mongoose.disconnect());
+});
