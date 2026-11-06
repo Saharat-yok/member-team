@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { PRIORITIES, STATUSES } from '../models/Task.js';
+import { PRIORITIES, STATUSES, isTimeZone, taskBaseFields } from '@task-manager/shared';
 
 const email = z.string().trim().toLowerCase().email();
 
@@ -30,10 +30,10 @@ const cursor = z.string().max(200).transform((raw, ctx) => {
 });
 
 const taskFields = z.object({
-  title: z.string().trim().min(1).max(120),
-  description: z.string().trim().max(2000).optional(),
-  status: z.enum(STATUSES).optional(),
-  priority: z.enum(PRIORITIES).optional(),
+  title: taskBaseFields.title,
+  description: taskBaseFields.description.optional(),
+  status: taskBaseFields.status.optional(),
+  priority: taskBaseFields.priority.optional(),
   dueDate: z.coerce.date().nullable().optional(), // ส่ง null = ล้างวันครบกำหนด
 });
 
@@ -52,10 +52,19 @@ export const listTasksQuery = z.object({
   limit: z.coerce.number().int().min(1).max(50).default(20),
 });
 
-const isTimeZone = (tz) => {
-  try { new Intl.DateTimeFormat('en', { timeZone: tz }); return true; } catch { return false; }
-};
-
 export const dueQuery = z.object({
   tz: z.string().max(64).refine(isTimeZone, 'Invalid time zone').default('Asia/Bangkok'),
+});
+
+export const pushSubscribeSchema = z.object({
+  endpoint: z.string().url().max(2000),
+  keys: z.object({
+    p256dh: z.string().min(10).max(200),
+    auth: z.string().min(10).max(100),
+  }),
+  tz: z.string().max(64).refine(isTimeZone, 'Invalid time zone').default('Asia/Bangkok'),
+});
+
+export const pushUnsubscribeSchema = z.object({
+  endpoint: z.string().url().max(2000),
 });

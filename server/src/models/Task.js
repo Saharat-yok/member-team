@@ -1,7 +1,8 @@
 import mongoose from 'mongoose';
 
-export const STATUSES = ['todo', 'in_progress', 'done'];
-export const PRIORITIES = ['low', 'medium', 'high'];
+import { PRIORITIES, STATUSES } from '@task-manager/shared';
+
+export { PRIORITIES, STATUSES };
 
 const taskSchema = new mongoose.Schema(
   {
