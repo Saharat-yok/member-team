@@ -5,6 +5,7 @@ import { requireAuth } from '../middlewares/auth.js';
 import { validate } from '../middlewares/validate.js';
 import * as auth from '../controllers/auth.controller.js';
 import * as task from '../controllers/task.controller.js';
+import * as push from '../controllers/push.controller.js';
 import * as s from '../validators/schemas.js';
 
 const router = Router();
@@ -24,5 +25,10 @@ router.post('/tasks', validate({ body: s.createTaskSchema }), task.createTask);
 router.get('/tasks/:id', validate({ params: s.idParams }), task.getTask);
 router.patch('/tasks/:id', validate({ params: s.idParams, body: s.updateTaskSchema }), task.updateTask);
 router.delete('/tasks/:id', validate({ params: s.idParams }), task.deleteTask);
+
+// Web Push
+router.get('/push/vapid-public-key', requireAuth, push.getVapidKey);
+router.post('/push/subscribe', requireAuth, validate({ body: s.pushSubscribeSchema }), push.subscribe);
+router.delete('/push/subscribe', requireAuth, validate({ body: s.pushUnsubscribeSchema }), push.unsubscribe);
 
 export default router;

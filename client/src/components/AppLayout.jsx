@@ -8,6 +8,7 @@ import { notifyDueOnce } from '../lib/notify.js';
 import { toast } from '../lib/toast.js';
 import { Button, Spinner } from './ui.jsx';
 import { TaskSheet } from './TaskSheet.jsx';
+import { OfflineBanner } from './OfflineBanner.jsx';
 const NAV = [['/', 'รายการ'], ['/board', 'บอร์ด'], ['/due', 'ใกล้ครบกำหนด']];
 function SheetHost() {
   const sheet = useSheet();
@@ -28,6 +29,7 @@ export default function AppLayout() {
   useEffect(() => notifyDueOnce(urgent), [urgent]);
   return (
     <div className="mx-auto min-h-dvh max-w-5xl pb-[calc(9rem_+_env(safe-area-inset-bottom))] md:pb-12">
+      <OfflineBanner />
       <div className="flex items-center justify-between px-4 pt-[env(safe-area-inset-top)]">
         <p className="text-sm text-slate-500">สวัสดี {me?.name}</p>
         <Button type="button" variant="ghost" onClick={() => logout.mutate()}>ออกจากระบบ</Button>

@@ -1,4 +1,5 @@
 import express from 'express';
+import mongoose from 'mongoose';
 import helmet from 'helmet';
 import cors from 'cors';
 import compression from 'compression';
@@ -16,7 +17,10 @@ app.use(compression()); // gzip → ประหยัดดาต้ามื�
 app.use(express.json({ limit: '50kb' }));
 app.use(cookieParser());
 
-app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+app.get('/health', (_req, res) => {
+  const dbReady = mongoose.connection.readyState === 1;
+  res.status(dbReady ? 200 : 503).json({ status: dbReady ? 'ok' : 'degraded', db: dbReady ? 'up' : 'down' });
+});
 app.use('/api/v1', routes);
 app.use(notFound);
 app.use(errorHandler);

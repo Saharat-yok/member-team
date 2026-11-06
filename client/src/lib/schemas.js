@@ -1,10 +1,9 @@
 import { z } from 'zod';
 
-// ⚠️ ต้องตรงกับ server/src/validators/schemas.js (Phase 4 จะย้ายไปไว้ใน shared package)
-export const STATUSES = ['todo', 'in_progress', 'done'];
-export const PRIORITIES = ['low', 'medium', 'high'];
-export const STATUS_LABEL = { todo: 'ต้องทำ', in_progress: 'กำลังทำ', done: 'เสร็จแล้ว' };
-export const PRIORITY_LABEL = { low: 'ต่ำ', medium: 'กลาง', high: 'สูง' };
+import { PRIORITIES, PRIORITY_LABEL, STATUSES, STATUS_LABEL, taskBaseFields } from '@task-manager/shared';
+
+// ค่าคงที่และกฎพื้นฐานของงานอยู่ใน @task-manager/shared เพื่อให้ตรงกับ server เสมอ
+export { PRIORITIES, PRIORITY_LABEL, STATUSES, STATUS_LABEL };
 
 export const loginSchema = z.object({
   email: z.string().trim().email('อีเมลไม่ถูกต้อง'),
@@ -20,10 +19,7 @@ export const registerSchema = loginSchema.extend({
 });
 
 export const taskFormSchema = z.object({
-  title: z.string().trim().min(1, 'กรุณาใส่ชื่องาน').max(120, 'ไม่เกิน 120 ตัวอักษร'),
-  description: z.string().trim().max(2000, 'ไม่เกิน 2000 ตัวอักษร'),
-  status: z.enum(STATUSES),
-  priority: z.enum(PRIORITIES),
+  ...taskBaseFields,
   // "2025-07-01" ถ้าส่งไปตรง ๆ จะถูกตีความเป็นเที่ยงคืน UTC จึงแปลงเป็นสิ้นวันตามเวลาเครื่องก่อน
   dueDate: z.string().transform((v) => (v ? new Date(`${v}T23:59:59`).toISOString() : null)),
 });

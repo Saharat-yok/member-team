@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '../lib/api.js';
+import { clearPersistedCache } from '../lib/queryClient.js';
 
 export function useMe() {
   return useQuery({
@@ -32,6 +33,7 @@ export function useLogout() {
   return useMutation({
     mutationFn: () => api('/auth/logout', { method: 'POST' }),
     onSettled: () => {
+      clearPersistedCache(); // ไม่ให้คนถัดไปที่เปิดเครื่องนี้เห็นข้อมูลที่แคชไว้ใน localStorage
       qc.removeQueries({ queryKey: ['tasks'] });
       qc.setQueryData(['me'], null);
     },
