@@ -7,7 +7,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { routes } from '../routes.jsx';
 import { CACHE_KEY, createQueryClient } from '../lib/queryClient.js';
 import { enableNotifications } from '../lib/notify.js';
-import { USER, resetDb, server } from './server.js';
+import { USER, db, resetDb, server } from './server.js';
+
+const setOnline = (value) =>
+  act(() => {
+    Object.defineProperty(navigator, 'onLine', { value, configurable: true });
+    window.dispatchEvent(new Event(value ? 'online' : 'offline'));
+  });
 
 const renderApp = (path = '/', persist = false) => {
   const client = createQueryClient({ persist });
@@ -95,5 +101,29 @@ describe('Phase 4: Offline, Cache & Web Push', () => {
     await user.click(screen.getByRole('button', { name: 'ออกจากระบบ' }));
     expect(await screen.findByRole('heading', { name: 'เข้าสู่ระบบ' })).toBeInTheDocument();
     expect(localStorage.getItem(CACHE_KEY)).toBeNull();
+  });
+
+  it('TC-36 แก้งานตอนออฟไลน์ → UI เปลี่ยนทันที, ยังไม่ส่ง, แล้วส่งอัตโนมัติเมื่อกลับมาออนไลน์', async () => {
+    let patched = 0;
+    server.use(http.patch('/api/v1/tasks/:id', async ({ request, params }) => {
+      patched++;
+      Object.assign(db.tasks.find((t) => t._id === params.id), await request.json());
+      return HttpResponse.json({ data: db.tasks[0] });
+    }));
+    const { user } = renderApp('/');
+    const box = await screen.findByRole('checkbox', { name: /ประชุมทีม/ });
+
+    await setOnline(false);
+    await user.click(box);
+    await waitFor(() => expect(box).toBeChecked());           // optimistic
+    expect(await screen.findByText(/รอส่ง 1 รายการ/)).toBeInTheDocument();
+    await new Promise((r) => setTimeout(r, 200));
+    expect(patched).toBe(0);                                  // ยังไม่ส่ง และไม่ rollback
+    expect(box).toBeChecked();
+
+    await setOnline(true);
+    await waitFor(() => expect(patched).toBe(1));             // ส่งจากคิวหลังกลับมาออนไลน์
+    expect(db.tasks[0].status).toBe('done');
+    expect(await screen.findByRole('checkbox', { name: /ประชุมทีม/ })).toBeChecked();
   });
 });

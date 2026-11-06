@@ -46,8 +46,10 @@ export function createQueryClient({ persist = false } = {}) {
         networkMode: 'offlineFirst',
         retry: (n, err) => (err?.status === 0 || err?.status >= 500) && n < 2,
       },
+      // mutation ต้องใช้โหมด 'online' (ค่า default): ตอนออฟไลน์จะถูกพักไว้ในคิวแล้วส่งเมื่อกลับมาออนไลน์
+      // ถ้าใช้ 'offlineFirst' มันจะลองส่งทันที fetch ล้ม แล้ว rollback ทำให้การแก้ไขตอนออฟไลน์หายไป
       mutations: {
-        networkMode: 'offlineFirst',
+        networkMode: 'online',
       },
     },
   });
