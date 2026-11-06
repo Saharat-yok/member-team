@@ -73,7 +73,7 @@ describe('Tasks API', () => {
 
     const page1 = await alice.get(API).query({ limit: 2 }).expect(200);
     expect(page1.body.data).toHaveLength(2);
-    expect(page1.body.meta).toMatchObject({ page: 1, total: 3, hasMore: true });
+    expect(page1.body.meta).toMatchObject({ total: 3, hasMore: true, nextCursor: expect.any(String) });
   });
 
   it('TC-13 ไม่ได้ login → 401', async () => {

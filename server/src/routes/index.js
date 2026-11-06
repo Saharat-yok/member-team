@@ -19,6 +19,7 @@ router.get('/auth/me', requireAuth, auth.me);
 // Tasks — ต้อง login ทุก endpoint
 router.use('/tasks', requireAuth);
 router.get('/tasks', validate({ query: s.listTasksQuery }), task.listTasks);
+router.get('/tasks/due', validate({ query: s.dueQuery }), task.dueTasks);
 router.post('/tasks', validate({ body: s.createTaskSchema }), task.createTask);
 router.get('/tasks/:id', validate({ params: s.idParams }), task.getTask);
 router.patch('/tasks/:id', validate({ params: s.idParams, body: s.updateTaskSchema }), task.updateTask);

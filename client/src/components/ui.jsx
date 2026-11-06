@@ -37,7 +37,7 @@ export function Toaster() {
   const msg = useSyncExternalStore(subscribe, getToast);
   return (
     <div aria-live="polite"
-      className="pointer-events-none fixed inset-x-0 bottom-[calc(6rem_+_env(safe-area-inset-bottom))] z-50 flex justify-center px-4">
+      className="pointer-events-none fixed inset-x-0 bottom-[calc(9.5rem_+_env(safe-area-inset-bottom))] z-50 flex justify-center px-4 md:bottom-24">
       {msg && <p className="rounded-xl bg-slate-900 px-4 py-3 text-sm text-white shadow-lg">{msg}</p>}
     </div>
   );
